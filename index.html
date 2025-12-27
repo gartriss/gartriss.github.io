@@ -1,1 +1,194 @@
-under construction
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Countdown</title>
+    <style type="text/css">
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #000000;
+            color: #ffffff;
+            font-family: Arial, Helvetica, sans-serif;
+            overflow: hidden;
+        }
+
+        #starfield {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: #ffffff;
+            font-size: 0;
+        }
+
+        #content {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            text-align: center;
+        }
+
+        #center-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300px;
+            margin-left: -150px;
+            margin-top: -40px;
+        }
+
+        #countdown {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        #bottom-text {
+            font-size: 16px;
+            color: #888888;
+            letter-spacing: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div id="starfield"></div>
+
+    <div id="content">
+        <div id="center-wrapper">
+            <div id="countdown">...</div>
+            <div id="bottom-text">i'll leave</div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        (function () {
+            var starCount = 150;
+            var stars = [];
+            var centerZ = 1000;
+            var speed = 8;
+            var starfield = document.getElementById('starfield');
+            var width = 0;
+            var height = 0;
+            var centerX = 0;
+            var centerY = 0;
+
+            function resize() {
+                width = starfield.offsetWidth;
+                height = starfield.offsetHeight;
+                centerX = width / 2;
+                centerY = height / 2;
+            }
+
+            function createStar(i) {
+                var div = document.createElement('div');
+                div.className = 'star';
+                starfield.appendChild(div);
+
+                stars[i] = {
+                    el: div,
+                    x: Math.random() * 2 - 1,
+                    y: Math.random() * 2 - 1,
+                    z: Math.random() * centerZ
+                };
+            }
+
+            function resetStar(star) {
+                star.x = Math.random() * 2 - 1;
+                star.y = Math.random() * 2 - 1;
+                star.z = centerZ;
+            }
+
+            function animate() {
+                for (var i = 0; i < starCount; i++) {
+                    var star = stars[i];
+                    star.z -= speed;
+                    if (star.z <= 1) resetStar(star);
+
+                    var k = 1000 / star.z;
+                    var sx = centerX + star.x * k * 50;
+                    var sy = centerY + star.y * k * 50;
+
+                    if (sx < 0 || sx >= width || sy < 0 || sy >= height) {
+                        resetStar(star);
+                        continue;
+                    }
+
+                    var size = (1 - star.z / centerZ) * 3;
+                    if (size < 1) size = 1;
+                    if (size > 4) size = 4;
+
+                    var el = star.el;
+                    el.style.left = (sx | 0) + 'px';
+                    el.style.top = (sy | 0) + 'px';
+                    el.style.width = size + 'px';
+                    el.style.height = size + 'px';
+                }
+            }
+
+            function init() {
+                resize();
+                for (var i = 0; i < starCount; i++) createStar(i);
+                setInterval(animate, 40);
+            }
+
+            init();
+
+            if (window.addEventListener) window.addEventListener('resize', resize, false);
+            else if (window.attachEvent) window.attachEvent('onresize', resize);
+            else window.onresize = resize;
+        })();
+
+        (function () {
+            var targetDate = new Date(2026, 0, 1, 0, 0, 0);
+            var countdownEl = document.getElementById('countdown');
+
+            function updateCountdown() {
+                var now = new Date();
+                var diff = targetDate - now;
+
+                if (diff <= 0) {
+                    countdownEl.innerHTML = '00д 00ч 00м 00с';
+                    return;
+                }
+
+                var seconds = Math.floor(diff / 1000);
+                var days = Math.floor(seconds / 86400);
+                seconds -= days * 86400;
+
+                var hours = Math.floor(seconds / 3600);
+                seconds -= hours * 3600;
+
+                var minutes = Math.floor(seconds / 60);
+                seconds -= minutes * 60;
+
+                function pad(n) { return n < 10 ? '0' + n : n; }
+
+                countdownEl.innerHTML =
+                    pad(days) + 'd ' +
+                    pad(hours) + 'h ' +
+                    pad(minutes) + 'm ' +
+                    pad(seconds) + 's';
+            }
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        })();
+    </script>
+</body>
+</html>
