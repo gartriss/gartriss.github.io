@@ -37,22 +37,56 @@ html, body {
 .music-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
-@media (max-width: 600px) {
-    .center {
-        width: 98vw;
-        margin: 10px auto;
-    }
+/* Volume slider styled like 7.css */
+.volume-box {
+    display: flex;
+    align-items: center;
+    background: #ece9d8;
+    border: 1px solid #a7a7a7;
+    box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #c8c8c8;
+    padding: 4px 6px;
+    height: 26px;
+    border-radius: 3px;
+}
 
-    .window-body {
-        padding: 12px;
-    }
+.volume-box input[type=range] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 130px;
+    height: 6px;
+    background: #d0d0d0;
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+    box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #b0b0b0;
+}
 
-    .title-bar-text {
-        font-size: 14px;
-    }
+.volume-box input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 20px;
+    background: #f0f0f0;
+    border: 1px solid #8f8f8f;
+    border-radius: 2px;
+    box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #b0b0b0;
+}
+
+.volume-box input[type=range]::-moz-range-thumb {
+    width: 14px;
+    height: 20px;
+    background: #f0f0f0;
+    border: 1px solid #8f8f8f;
+    border-radius: 2px;
+    box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #b0b0b0;
+}
+
+.volume-box input[type=range]::-moz-range-track {
+    background: #d0d0d0;
+    height: 6px;
+    border-radius: 3px;
 }
 </style>
 </head>
@@ -61,7 +95,7 @@ html, body {
 
 <canvas id="bgCanvas"></canvas>
 
-<audio id="music" loop autoplay>
+<audio id="music" loop muted>
     <source src="https://frutigeraeroarchive.org/music/takeshi_abo_lease.mp3" type="audio/mpeg">
 </audio>
 
@@ -83,6 +117,11 @@ html, body {
 
             <div class="music-row">
                 <button id="toggleMusic">Play</button>
+
+                <div class="volume-box">
+                    <input id="volume" type="range" min="0" max="100" value="100">
+                </div>
+
                 <span><b>Takeshi Abo – LEASE</b></span>
             </div>
 
@@ -149,15 +188,21 @@ var btn = document.getElementById("toggleMusic");
 var playing = false;
 
 btn.onclick = function () {
-    if (playing) {
-        music.pause();
-        btn.innerHTML = "Play";
-        playing = false;
-    } else {
+    if (!playing) {
+        music.muted = false;
         music.play();
         btn.innerHTML = "Pause";
         playing = true;
+    } else {
+        music.pause();
+        btn.innerHTML = "Play";
+        playing = false;
     }
+};
+
+var volume = document.getElementById("volume");
+volume.oninput = function () {
+    music.volume = volume.value / 100;
 };
 </script>
 
