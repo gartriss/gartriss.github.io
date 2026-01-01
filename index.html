@@ -1,194 +1,165 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Countdown</title>
-    <style type="text/css">
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            background-color: #000000;
-            color: #ffffff;
-            font-family: Arial, Helvetica, sans-serif;
-            overflow: hidden;
-        }
+<meta charset="UTF-8">
+<title>hi there!</title>
 
-        #starfield {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000000;
-            overflow: hidden;
-            z-index: 1;
-        }
+<link rel="stylesheet" href="https://unpkg.com/7.css">
 
-        .star {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background-color: #ffffff;
-            font-size: 0;
-        }
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    font-family: Tahoma, Verdana, Arial, sans-serif;
+}
 
-        #content {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            text-align: center;
-        }
+#bgCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
 
-        #center-wrapper {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 300px;
-            margin-left: -150px;
-            margin-top: -40px;
-        }
+.center {
+    width: 95vw;
+    max-width: 900px;
+    margin: 20px auto;
+}
 
-        #countdown {
-            font-size: 32px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-        }
+.window-body {
+    padding: 18px;
+}
 
-        #bottom-text {
-            font-size: 16px;
-            color: #888888;
-            letter-spacing: 3px;
-        }
-    </style>
+.music-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+@media (max-width: 600px) {
+    .center {
+        width: 98vw;
+        margin: 10px auto;
+    }
+
+    .window-body {
+        padding: 12px;
+    }
+
+    .title-bar-text {
+        font-size: 14px;
+    }
+}
+</style>
 </head>
-<body>
-    <div id="starfield"></div>
 
-    <div id="content">
-        <div id="center-wrapper">
-            <div id="countdown">...</div>
-            <div id="bottom-text">i'll leave</div>
+<body>
+
+<canvas id="bgCanvas"></canvas>
+
+<audio id="music" loop autoplay>
+    <source src="https://frutigeraeroarchive.org/music/takeshi_abo_lease.mp3" type="audio/mpeg">
+</audio>
+
+<div class="center">
+    <div class="window active">
+        <div class="title-bar">
+            <div class="title-bar-text">Welcome Message</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize"></button>
+                <button aria-label="Maximize"></button>
+                <button aria-label="Close"></button>
+            </div>
+        </div>
+
+        <div class="window-body">
+            <p><b>Hi there!</b></p>
+            <p>i'm gartriss, and this is my website!</p>
+            <p>Have a nice time here :></p>
+
+            <div class="music-row">
+                <button id="toggleMusic">Play</button>
+                <span><b>Takeshi Abo – LEASE</b></span>
+            </div>
+
+            <hr>
+
+            <div style="text-align:center; margin-top:20px;">
+                <a href="https://frutigeraeroarchive.org/">
+                    <img src="https://frutigeraeroarchive.org/images/ads/fa_archive_180x180.png" 
+                         alt="Frutiger Aero Archive">
+                </a>
+            </div>
         </div>
     </div>
+</div>
 
-    <script type="text/javascript">
-        (function () {
-            var starCount = 150;
-            var stars = [];
-            var centerZ = 1000;
-            var speed = 8;
-            var starfield = document.getElementById('starfield');
-            var width = 0;
-            var height = 0;
-            var centerX = 0;
-            var centerY = 0;
+<script>
+var canvas = document.getElementById("bgCanvas");
+var ctx = canvas.getContext("2d");
 
-            function resize() {
-                width = starfield.offsetWidth;
-                height = starfield.offsetHeight;
-                centerX = width / 2;
-                centerY = height / 2;
-            }
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resize();
+window.onresize = resize;
 
-            function createStar(i) {
-                var div = document.createElement('div');
-                div.className = 'star';
-                starfield.appendChild(div);
+var t = 0;
 
-                stars[i] = {
-                    el: div,
-                    x: Math.random() * 2 - 1,
-                    y: Math.random() * 2 - 1,
-                    z: Math.random() * centerZ
-                };
-            }
+function plasma() {
+    var w = canvas.width;
+    var h = canvas.height;
 
-            function resetStar(star) {
-                star.x = Math.random() * 2 - 1;
-                star.y = Math.random() * 2 - 1;
-                star.z = centerZ;
-            }
+    var img = ctx.createImageData(w, h);
+    var data = img.data;
 
-            function animate() {
-                for (var i = 0; i < starCount; i++) {
-                    var star = stars[i];
-                    star.z -= speed;
-                    if (star.z <= 1) resetStar(star);
+    t += 0.08;
 
-                    var k = 1000 / star.z;
-                    var sx = centerX + star.x * k * 50;
-                    var sy = centerY + star.y * k * 50;
+    for (var y = 0; y < h; y++) {
+        for (var x = 0; x < w; x++) {
 
-                    if (sx < 0 || sx >= width || sy < 0 || sy >= height) {
-                        resetStar(star);
-                        continue;
-                    }
+            var v =
+                Math.sin(x / 40 + t) +
+                Math.sin(y / 30 + t * 1.3) +
+                Math.sin((x + y) / 50 + t * 0.7);
 
-                    var size = (1 - star.z / centerZ) * 3;
-                    if (size < 1) size = 1;
-                    if (size > 4) size = 4;
+            var c = Math.floor((v + 3) * 42);
 
-                    var el = star.el;
-                    el.style.left = (sx | 0) + 'px';
-                    el.style.top = (sy | 0) + 'px';
-                    el.style.width = size + 'px';
-                    el.style.height = size + 'px';
-                }
-            }
+            var i = (y * w + x) * 4;
 
-            function init() {
-                resize();
-                for (var i = 0; i < starCount; i++) createStar(i);
-                setInterval(animate, 40);
-            }
+            data[i]     = c * 0.6;
+            data[i + 1] = c * 0.2;
+            data[i + 2] = c;
+            data[i + 3] = 255;
+        }
+    }
 
-            init();
+    ctx.putImageData(img, 0, 0);
+}
 
-            if (window.addEventListener) window.addEventListener('resize', resize, false);
-            else if (window.attachEvent) window.attachEvent('onresize', resize);
-            else window.onresize = resize;
-        })();
+setInterval(plasma, 40);
 
-        (function () {
-            var targetDate = new Date(2026, 0, 1, 0, 0, 0);
-            var countdownEl = document.getElementById('countdown');
+var music = document.getElementById("music");
+var btn = document.getElementById("toggleMusic");
+var playing = false;
 
-            function updateCountdown() {
-                var now = new Date();
-                var diff = targetDate - now;
+btn.onclick = function () {
+    if (playing) {
+        music.pause();
+        btn.innerHTML = "Play";
+        playing = false;
+    } else {
+        music.play();
+        btn.innerHTML = "Pause";
+        playing = true;
+    }
+};
+</script>
 
-                if (diff <= 0) {
-                    countdownEl.innerHTML = '00д 00ч 00м 00с';
-                    return;
-                }
-
-                var seconds = Math.floor(diff / 1000);
-                var days = Math.floor(seconds / 86400);
-                seconds -= days * 86400;
-
-                var hours = Math.floor(seconds / 3600);
-                seconds -= hours * 3600;
-
-                var minutes = Math.floor(seconds / 60);
-                seconds -= minutes * 60;
-
-                function pad(n) { return n < 10 ? '0' + n : n; }
-
-                countdownEl.innerHTML =
-                    pad(days) + 'd ' +
-                    pad(hours) + 'h ' +
-                    pad(minutes) + 'm ' +
-                    pad(seconds) + 's';
-            }
-
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
-        })();
-    </script>
 </body>
 </html>
